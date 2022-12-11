@@ -1,0 +1,12 @@
+{
+  "name": "ask-openai-cli",
+  "version": "1.0.0",
+  "description": "CLI for using OpenAI models in terminal",
+  "main": "index.ts",
+  "scripts": {
+    "start": "deno run -A index.ts",
+    "build": "deno compile --unstable --allow-net --allow-read --allow-write --allow-env --allow-run --output build/ask index.ts"
+  },
+  "author": "sokyran",
+  "license": "ISC"
+}
