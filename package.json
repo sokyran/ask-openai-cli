@@ -5,7 +5,8 @@
   "main": "index.ts",
   "scripts": {
     "start": "deno run -A index.ts",
-    "build": "deno compile --unstable --allow-net --allow-read --allow-write --allow-env --allow-run --output build/ask index.ts"
+    "build": "deno compile --unstable --allow-net --allow-read --allow-write --allow-env --allow-run --output build/ask index.ts",
+    "move": "sudo mv build/ask /usr/local/bin/ask"
   },
   "author": "sokyran",
   "license": "ISC"
