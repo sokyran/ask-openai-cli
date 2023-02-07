@@ -1,20 +1,20 @@
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 
 type Options = {
-  number: number | string;
-  temperature: number | string;
-  topP: number | string;
-  max: number | string;
+  number: number;
+  temperature: number;
+  topP: number;
+  max: number;
 };
 
 await new Command()
   .name("ask")
   .version("0.0.1")
   .description("Generate answers using OpenAI's GPT-3 API")
-  .option("-n, --number <number>", "Number of completions to generate", { default: 1 })
-  .option("-t, --temperature <temperature>", "Temperature for output sampling", { default: 1.0 })
-  .option("--top-p <top-p>", "top_p value for nucleus sampling", { default: 0.9 })
-  .option("--max <max>", "Max number of tokens to generate", { default: 256 })
+  .option("-n, --number <number:number>", "Number of completions to generate", { default: 1 })
+  .option("-t, --temperature <temperature:number>", "Temperature for output sampling", { default: 1.0 })
+  .option("--top-p <top-p:number>", "top_p value for nucleus sampling", { default: 0.9 })
+  .option("--max <max:number>", "Max number of tokens to generate", { default: 256 })
   .arguments("<prompt:string>")
   .action(async (options, promptArg) => {
     const data = await makeRequest(promptArg, options);
