@@ -12,9 +12,9 @@ await new Command()
   .version("0.0.1")
   .description("Generate answers using OpenAI's GPT-3 API")
   .option("-n, --number <number:number>", "Number of completions to generate", { default: 1 })
-  .option("-t, --temperature <temperature:number>", "Temperature for output sampling", { default: 1.0 })
+  .option("-t, --temperature <temperature:number>", "Temperature for output sampling", { default: 0.4 })
   .option("--top-p <top-p:number>", "top_p value for nucleus sampling", { default: 0.9 })
-  .option("--max <max:number>", "Max number of tokens to generate", { default: 256 })
+  .option("--max <max:number>", "Max number of tokens to generate", { default: 512 })
   .arguments("<prompt:string>")
   .action(async (options, promptArg) => {
     const data = await makeRequest(promptArg, options);
@@ -31,7 +31,7 @@ async function makeRequest(prompt: string, options: Options) {
   };
   const body = {
     prompt,
-    model: 'text-davinci-002',
+    model: 'text-davinci-003',
     max_tokens: options.max,
     temperature: options.temperature,
     top_p: options.topP,
