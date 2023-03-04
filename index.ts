@@ -24,14 +24,17 @@ await new Command()
   .parse(Deno.args);
 
 async function makeRequest(prompt: string, options: Options) {
-  const url = "https://api.openai.com/v1/completions";
+  const url = "https://api.openai.com/v1/chat/completions";
   const headers = {
     "Content-Type": "application/json",
     "Authorization": `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
   };
   const body = {
-    prompt,
-    model: 'text-davinci-003',
+    model: 'gpt-3.5-turbo',
+    messages: [
+      {"role": "system", "content": "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible."},
+      {"role": "user", "content": prompt},
+    ],
     max_tokens: options.max,
     temperature: options.temperature,
     top_p: options.topP,
@@ -50,6 +53,5 @@ async function makeRequest(prompt: string, options: Options) {
     return data.error.message;
   }
 
-  return data.choices[0].text.trim();
+  return data.choices[0].message.content.trim('\n');
 }
-
