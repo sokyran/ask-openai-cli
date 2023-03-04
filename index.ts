@@ -19,7 +19,7 @@ await new Command()
   .action(async (options, promptArg) => {
     const data = await makeRequest(promptArg, options);
 
-    console.log(data);
+    console.log(`\n${data.trim('\n')}`);
   })
   .parse(Deno.args);
 
