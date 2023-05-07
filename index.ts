@@ -5,6 +5,7 @@ type Options = {
   temperature: number;
   topP: number;
   max: number;
+  model: string;
 };
 
 await new Command()
@@ -15,6 +16,7 @@ await new Command()
   .option("-t, --temperature <temperature:number>", "Temperature for output sampling", { default: 0.4 })
   .option("--top-p <top-p:number>", "top_p value for nucleus sampling", { default: 0.9 })
   .option("--max <max:number>", "Max number of tokens to generate", { default: 512 })
+  .option("--model <model:string>", "Model to use", { default: "gpt-3.5-turbo" })
   .arguments("<prompt:string>")
   .action(async (options, promptArg) => {
     const data = await makeRequest(promptArg, options);
@@ -30,7 +32,7 @@ async function makeRequest(prompt: string, options: Options) {
     "Authorization": `Bearer ${Deno.env.get("OPENAI_API_KEY")}`,
   };
   const body = {
-    model: 'gpt-3.5-turbo',
+    model: options.model,
     messages: [
       {"role": "system", "content": "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible."},
       {"role": "user", "content": prompt},
