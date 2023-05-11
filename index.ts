@@ -10,7 +10,7 @@ type Options = {
 
 await new Command()
   .name("ask")
-  .version("0.0.1")
+  .version("0.0.2")
   .description("Generate answers using OpenAI's GPT-3 API")
   .option("-n, --number <number:number>", "Number of completions to generate", { default: 1 })
   .option("-t, --temperature <temperature:number>", "Temperature for output sampling", { default: 0.4 })
@@ -18,11 +18,7 @@ await new Command()
   .option("--max <max:number>", "Max number of tokens to generate", { default: 512 })
   .option("--model <model:string>", "Model to use", { default: "gpt-3.5-turbo" })
   .arguments("<prompt:string>")
-  .action(async (options, promptArg) => {
-    const data = await makeRequest(promptArg, options);
-
-    console.log(`\n${data.trim('\n')}`);
-  })
+  .action((options, promptArg) => makeRequest(promptArg, options))
   .parse(Deno.args);
 
 async function makeRequest(prompt: string, options: Options) {
@@ -41,6 +37,7 @@ async function makeRequest(prompt: string, options: Options) {
     temperature: options.temperature,
     top_p: options.topP,
     n: options.number,
+    stream: true,
   };
 
   const response = await fetch(url, {
@@ -49,11 +46,38 @@ async function makeRequest(prompt: string, options: Options) {
     body: JSON.stringify(body),
   });
 
-  const data = await response.json();
+  const reader = response.body?.getReader();
+  const textDecoder = new TextDecoder();
+  const textEncoder = new TextEncoder();
 
-  if (data.error) {
-    return data.error.message;
+  // deno-lint-ignore no-explicit-any
+  const processText = ({ done, value }: ReadableStreamDefaultReadResult<Uint8Array>): any => {
+    if (done) {
+      return;
+    }
+
+    const jsonString = textDecoder.decode(value);
+
+    // In request, there might be multiple jsons, like "data: {} \n data: {}"
+    // Also we filter out "data: [DONE]]"
+    const vaildJsons = jsonString.split('\n')
+      .filter((part) => part.length > 0 && part !== 'data: [DONE]')
+      .map((part) => part.replace('data: ', ''));
+
+    vaildJsons.forEach((jsonString) => {
+      try {
+        const json = JSON.parse(jsonString);
+  
+        if (json?.choices[0]?.delta?.content && json.choices[0].delta.content.length > 0) {
+          Deno.stdout.write(textEncoder.encode(json.choices[0].delta.content));
+        }
+      } catch(err) {
+        throw new Error(`Failed to parse json: ${jsonString}\n${err}`);
+      }
+    });
+
+    return reader?.read().then(processText);
   }
 
-  return data.choices[0].message.content.trim('\n');
+  reader?.read().then(processText);
 }
