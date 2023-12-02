@@ -10,13 +10,13 @@ type Options = {
 
 await new Command()
   .name("ask")
-  .version("0.0.2")
+  .version("0.0.3")
   .description("Generate answers using OpenAI's GPT-3 API")
   .option("-n, --number <number:number>", "Number of completions to generate", { default: 1 })
   .option("-t, --temperature <temperature:number>", "Temperature for output sampling", { default: 0.4 })
   .option("--top-p <top-p:number>", "top_p value for nucleus sampling", { default: 0.9 })
   .option("--max <max:number>", "Max number of tokens to generate", { default: 512 })
-  .option("--model <model:string>", "Model to use", { default: "gpt-3.5-turbo" })
+  .option("--model <model:string>", "Model to use", { default: "gpt-4-1106-preview" })
   .arguments("<prompt:string>")
   .action((options, promptArg) => makeRequest(promptArg, options))
   .parse(Deno.args);
