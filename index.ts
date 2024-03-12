@@ -6,17 +6,21 @@ type Options = {
   topP: number;
   max: number;
   model: string;
+  debug: boolean;
+  stream: boolean;
 };
 
 await new Command()
   .name("ask")
-  .version("0.0.3")
+  .version("0.0.4")
   .description("Generate answers using OpenAI's GPT-3 API")
   .option("-n, --number <number:number>", "Number of completions to generate", { default: 1 })
   .option("-t, --temperature <temperature:number>", "Temperature for output sampling", { default: 0.4 })
   .option("--top-p <top-p:number>", "top_p value for nucleus sampling", { default: 0.9 })
   .option("--max <max:number>", "Max number of tokens to generate", { default: 512 })
-  .option("--model <model:string>", "Model to use", { default: "gpt-4-1106-preview" })
+  .option("--model <model:string>", "Model to use", { default: "gpt-4-turbo-preview" })
+  .option("--stream", "Stream output", { default: false })
+  .option("--debug", "Enable debug mode", { default: true })
   .arguments("<prompt:string>")
   .action((options, promptArg) => makeRequest(promptArg, options))
   .parse(Deno.args);
@@ -37,7 +41,7 @@ async function makeRequest(prompt: string, options: Options) {
     temperature: options.temperature,
     top_p: options.topP,
     n: options.number,
-    stream: true,
+    stream: options.stream,
   };
 
   const response = await fetch(url, {
@@ -45,6 +49,23 @@ async function makeRequest(prompt: string, options: Options) {
     headers,
     body: JSON.stringify(body),
   });
+
+  if (!Deno.env.get("OPENAI_API_KEY")) {
+    console.log("Error: OPENAI_API_KEY is not set!\n");
+
+    return;
+  }
+
+  if (options.debug) {
+    console.log("Current model:", options.model, "\n");
+  }
+
+  if (!options.stream) {
+    const json = await response.json();
+    console.log(json.choices[0].message.content);
+
+    return;
+  }
 
   const reader = response.body?.getReader();
   const textDecoder = new TextDecoder();
