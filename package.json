@@ -1,6 +1,6 @@
 {
   "name": "ask-openai-cli",
-  "version": "1.0.0",
+  "version": "0.0.5",
   "description": "CLI for using OpenAI models in terminal",
   "main": "index.ts",
   "scripts": {

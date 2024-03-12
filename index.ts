@@ -1,3 +1,4 @@
+import packageJson from "./package.json" with { type: "json" };
 import { Command } from "https://deno.land/x/cliffy@v0.25.5/command/mod.ts";
 
 type Options = {
@@ -12,20 +13,20 @@ type Options = {
 
 await new Command()
   .name("ask")
-  .version("0.0.4")
+  .version(packageJson.version)
   .description("Generate answers using OpenAI's GPT-3 API")
   .option("-n, --number <number:number>", "Number of completions to generate", { default: 1 })
   .option("-t, --temperature <temperature:number>", "Temperature for output sampling", { default: 0.4 })
   .option("--top-p <top-p:number>", "top_p value for nucleus sampling", { default: 0.9 })
   .option("--max <max:number>", "Max number of tokens to generate", { default: 512 })
   .option("--model <model:string>", "Model to use", { default: "gpt-4-turbo-preview" })
-  .option("--stream", "Stream output", { default: false })
-  .option("--debug", "Enable debug mode", { default: true })
-  .arguments("<prompt:string>")
-  .action((options, promptArg) => makeRequest(promptArg, options))
+  .option("--stream [stream:boolean]", "Stream output", { default: false })
+  .option("--debug [debug:boolean]", "Enable debug mode", { default: true })
+  .arguments("<...prompt:string>")
+  .action((options, ...promptArg) => makeRequest(promptArg, options))
   .parse(Deno.args);
 
-async function makeRequest(prompt: string, options: Options) {
+async function makeRequest(prompt: string[], options: Options) {
   const url = "https://api.openai.com/v1/chat/completions";
   const headers = {
     "Content-Type": "application/json",
@@ -35,7 +36,7 @@ async function makeRequest(prompt: string, options: Options) {
     model: options.model,
     messages: [
       {"role": "system", "content": "You are ChatGPT, a large language model trained by OpenAI. Answer as concisely as possible."},
-      {"role": "user", "content": prompt},
+      {"role": "user", "content": prompt.join(" ")},
     ],
     max_tokens: options.max,
     temperature: options.temperature,
@@ -74,6 +75,7 @@ async function makeRequest(prompt: string, options: Options) {
   // deno-lint-ignore no-explicit-any
   const processText = ({ done, value }: ReadableStreamDefaultReadResult<Uint8Array>): any => {
     if (done) {
+      console.log("\n");
       return;
     }
 
